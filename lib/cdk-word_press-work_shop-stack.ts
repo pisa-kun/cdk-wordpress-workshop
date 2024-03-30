@@ -6,6 +6,9 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 
 import { Construct } from 'constructs';
 
+// ファイルを読み込むためのパッケージを import
+import { readFileSync } from "fs";
+
 export class CdkWordPressWorkShopStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -16,7 +19,7 @@ export class CdkWordPressWorkShopStack extends Stack {
     });
 
     // AWS Linux2
-    new ec2.Instance(this, "WordPressServer1", {
+    const webServer1 = new ec2.Instance(this, "WordPressServer1", {
       vpc,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
       machineImage: new ec2.AmazonLinuxImage({
@@ -25,5 +28,10 @@ export class CdkWordPressWorkShopStack extends Stack {
       // ec2インスタンスを配置するサブネットを指定、
       vpcSubnets: {subnetType: ec2.SubnetType.PUBLIC},
     });
+
+    // user-data.shを読み込み変数に格納
+    const script = readFileSync("./lib/resources/user-data.sh","utf-8");
+    // EC2インスタンスにユーザーデータを追加
+    webServer1.addUserData(script);
   }
 }
