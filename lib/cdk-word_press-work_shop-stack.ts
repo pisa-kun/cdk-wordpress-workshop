@@ -1,4 +1,4 @@
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -33,5 +33,12 @@ export class CdkWordPressWorkShopStack extends Stack {
     const script = readFileSync("./lib/resources/user-data.sh","utf-8");
     // EC2インスタンスにユーザーデータを追加
     webServer1.addUserData(script);
+
+    // port80, 全てのIPアドレスからのアクセス許可
+    webServer1.connections.allowFromAnyIpv4(ec2.Port.tcp(80));
+    // ec2インスタンスアクセス用のIPアドレスを出力
+    new CfnOutput(this, "WordPressServer1PublicIPAddress",{
+      value: `http://${webServer1.instancePublicIp}`,
+    });
   }
 }
