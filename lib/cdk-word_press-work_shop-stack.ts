@@ -46,6 +46,13 @@ export class CdkWordPressWorkShopStack extends Stack {
     const dbServer = new rds.DatabaseInstance(this, "WordPressDB",{
       vpc,
       engine: rds.DatabaseInstanceEngine.mysql({version: rds.MysqlEngineVersion.VER_8_0_31}),
+      // rds dbのインスタンスタイプを設定
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3,ec2.InstanceSize.SMALL),
+      // rds db インスタンスのデータベース名を設定
+      databaseName: "wordpress",
     });
+
+    // webserverからのアクセスを許可
+    dbServer.connections.allowDefaultPortFrom(webServer1);
   }
 }
