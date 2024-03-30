@@ -8,6 +8,7 @@ import { Construct } from 'constructs';
 
 // ファイルを読み込むためのパッケージを import
 import { readFileSync } from "fs";
+import * as rds from "aws-cdk-lib/aws-rds";
 
 export class CdkWordPressWorkShopStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -39,6 +40,12 @@ export class CdkWordPressWorkShopStack extends Stack {
     // ec2インスタンスアクセス用のIPアドレスを出力
     new CfnOutput(this, "WordPressServer1PublicIPAddress",{
       value: `http://${webServer1.instancePublicIp}`,
+    });
+
+    // RDSインスタンスを宣言
+    const dbServer = new rds.DatabaseInstance(this, "WordPressDB",{
+      vpc,
+      engine: rds.DatabaseInstanceEngine.mysql({version: rds.MysqlEngineVersion.VER_8_0_31}),
     });
   }
 }
