@@ -43,6 +43,7 @@ export class CdkWordPressWorkShopStack extends Stack {
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3,ec2.InstanceSize.SMALL),
       // rds db インスタンスのデータベース名を設定
       databaseName: "wordpress",
+      multiAz: true,
     });
 
     // webserverからのアクセスを許可
