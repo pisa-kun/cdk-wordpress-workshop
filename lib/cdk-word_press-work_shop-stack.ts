@@ -22,6 +22,8 @@ export class CdkWordPressWorkShopStack extends Stack {
       machineImage: new ec2.AmazonLinuxImage({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
+      // ec2インスタンスを配置するサブネットを指定、
+      vpcSubnets: {subnetType: ec2.SubnetType.PUBLIC},
     });
   }
 }
