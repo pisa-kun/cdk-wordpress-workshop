@@ -10,6 +10,11 @@ import { Construct } from 'constructs';
 import { readFileSync } from "fs";
 import * as rds from "aws-cdk-lib/aws-rds";
 
+// ALB を宣言するためのパッケージをimport
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+// target を追加するためのパッケージimport
+import * as targets from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
+
 export class CdkWordPressWorkShopStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -35,8 +40,9 @@ export class CdkWordPressWorkShopStack extends Stack {
     // EC2インスタンスにユーザーデータを追加
     webServer1.addUserData(script);
 
-    // port80, 全てのIPアドレスからのアクセス許可
-    webServer1.connections.allowFromAnyIpv4(ec2.Port.tcp(80));
+    // インターネットからインスタンスへの直sr津アクセスは不許可
+    //webServer1.connections.allowFromAnyIpv4(ec2.Port.tcp(80));
+  
     // ec2インスタンスアクセス用のIPアドレスを出力
     new CfnOutput(this, "WordPressServer1PublicIPAddress",{
       value: `http://${webServer1.instancePublicIp}`,
@@ -54,5 +60,26 @@ export class CdkWordPressWorkShopStack extends Stack {
 
     // webserverからのアクセスを許可
     dbServer.connections.allowDefaultPortFrom(webServer1);
+
+    // ALBを宣言
+    const alb = new elbv2.ApplicationLoadBalancer(this, "LoadBalancer",{
+      vpc,
+      internetFacing: true,
+    });
+    // リスナーを追加
+    const listener = alb.addListener("Listener",{
+      port:80,
+    });
+    // インスタンスをターゲットに追加
+    listener.addTargets("ApplicationFleet",{
+      port: 80,
+      targets: [new targets.InstanceTarget(webServer1, 80)],
+      healthCheck:{
+        path: "/wppincludes/images/blank.gif",
+      },
+    });
+
+    // ALBからインスタンスへのアクセスを許可
+    webServer1.connections.allowFrom(alb, ec2.Port.tcp(80));
   }
 }
