@@ -1,7 +1,4 @@
 import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
 import { Construct } from 'constructs';
